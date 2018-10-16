@@ -1,31 +1,27 @@
 import { Route, HTTPMethod } from '../route'
 import { BaseEntity } from 'typeorm'
 import { Router, Request, Response, NextFunction } from 'express'
-import { validate } from 'class-validator'
 
-export class CreateRoute<T extends BaseEntity> extends Route<T> {
-  constructor(private model: new () => T, router: Router, path: string) {
+export class CreateRoute extends Route {
+  constructor(private model: typeof BaseEntity, router: Router, path: string) {
     super(router, HTTPMethod.POST, path)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
     const entity = new this.model()
 
+    // copy over all supplied params to entity
     Object.assign(entity, request.body)
 
-    const errors = await validate(entity, {
-      forbidUnknownValues: true,
-      validationError: {
-        target: false
-      }
-    })
-
+    // validate object
+    const errors = await this.validateEntity(entity)
     if (errors && errors.length > 0) {
       return response.status(400).json(errors)
     }
 
-    const savedEntitiy = await entity.save()
+    // save object if valid
+    const savedEntity = await entity.save()
 
-    return response.status(201).json(savedEntitiy)
+    return response.status(201).json(savedEntity)
   }
 }
