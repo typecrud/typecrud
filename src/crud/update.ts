@@ -1,10 +1,10 @@
 import { Route, HTTPMethod } from '../route'
 import { BaseEntity } from 'typeorm'
-import { Router, Request, Response, NextFunction } from 'express'
+import { Request, Response, NextFunction } from 'express'
 
 export class UpdateRoute extends Route {
-  constructor(private model: typeof BaseEntity, router: Router, path: string) {
-    super(router, HTTPMethod.PATCH, path)
+  constructor(private model: typeof BaseEntity, path: string) {
+    super(HTTPMethod.PATCH, path)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {

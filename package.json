@@ -4,7 +4,7 @@
   "description": "",
   "main": "tsconfig.js",
   "scripts": {
-    "test": "mocha -r ts-node/register tests/**/**.ts"
+    "test": "mocha -r ts-node/register tests/unit/**/**.ts"
   },
   "author": "",
   "license": "ISC",
