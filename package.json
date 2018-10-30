@@ -2,9 +2,11 @@
   "name": "typecrud",
   "version": "1.0.0",
   "description": "",
-  "main": "tsconfig.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register tests/unit/**/**.ts"
+    "test": "mocha -r ts-node/register tests/unit/**/**.ts",
+    "build": "rimraf ./lib && tsc",
+    "prepublish": "npm run build"
   },
   "author": "",
   "license": "ISC",
@@ -23,6 +25,7 @@
     "@types/supertest": "^2.0.6",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
+    "rimraf": "^2.6.2",
     "sinon": "^7.0.0",
     "supertest": "^3.3.0",
     "ts-node": "^7.0.1",

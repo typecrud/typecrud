@@ -1,0 +1,2 @@
+# TypeCRUD
+This library aims to be a drop-in CRUD route generator for `node.js` express applications, using TypeORM. TypeCRUD works if you are using the `active record` pattern of TypeORM, extending your models from `BaseEntity`.
