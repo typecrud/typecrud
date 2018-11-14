@@ -2,7 +2,7 @@
   "name": "typecrud",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register tests/unit/**/**.ts",
     "build": "rimraf ./lib && tsc",

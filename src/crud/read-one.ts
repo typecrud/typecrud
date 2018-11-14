@@ -3,7 +3,7 @@ import { BaseEntity, FindOneOptions, Not, IsNull } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 
 export class ReadOneRoute extends Route {
-  constructor(private model: typeof BaseEntity, path: string) {
+  constructor(private model: typeof BaseEntity, path: string, validatorFunction?: Function) {
     super(HTTPMethod.GET, path)
   }
 

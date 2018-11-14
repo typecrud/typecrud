@@ -7,7 +7,7 @@ export class ReadRoute extends Route implements FilterableRoute, SortableRoute, 
   filterKeys: string[] = []
   sortBy: { key: string; order: SortOrder } = { key: 'id', order: SortOrder.ASC }
 
-  constructor(private model: typeof BaseEntity, path: string) {
+  constructor(private model: typeof BaseEntity, path: string, validatorFunction?: Function) {
     super(HTTPMethod.GET, path)
   }
 

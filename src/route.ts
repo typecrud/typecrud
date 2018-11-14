@@ -32,7 +32,7 @@ export abstract class Route {
   relations: string[] = []
   softDeletionKey?: string
 
-  constructor(private method: HTTPMethod, private path: string) {}
+  constructor(private method: HTTPMethod, private path: string, private validatorFunction?: Function) {}
 
   getRouter(): Router {
     return (Router() as any)[this.method.toLowerCase()](this.path, asyncRequestHandler(this.requestHandler.bind(this)))
@@ -41,6 +41,11 @@ export abstract class Route {
   abstract async requestHandler(request: Request, response: Response, next: NextFunction): Promise<void>
 
   protected async validateEntity(entity: BaseEntity): Promise<ValidationError[]> {
+    if (this.validatorFunction) {
+      const errors = await this.validatorFunction(entity)
+      return errors
+    }
+
     const errors = await validate(entity, {
       forbidUnknownValues: true,
       validationError: {

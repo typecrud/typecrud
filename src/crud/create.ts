@@ -3,8 +3,8 @@ import { BaseEntity } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 
 export class CreateRoute extends Route {
-  constructor(private model: typeof BaseEntity, path: string) {
-    super(HTTPMethod.POST, path)
+  constructor(private model: typeof BaseEntity, path: string, validatorFunction?: Function) {
+    super(HTTPMethod.POST, path, validatorFunction)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {

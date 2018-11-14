@@ -3,8 +3,8 @@ import { BaseEntity } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 
 export class UpdateRoute extends Route {
-  constructor(private model: typeof BaseEntity, path: string) {
-    super(HTTPMethod.PATCH, path)
+  constructor(private model: typeof BaseEntity, path: string, validatorFunction?: Function) {
+    super(HTTPMethod.PATCH, path, validatorFunction)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
