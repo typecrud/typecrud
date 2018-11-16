@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha -r ts-node/register tests/unit/**/**.ts",
     "build": "rimraf ./lib && tsc",
-    "prepublish": "npm run build"
+    "prepare": "npm run build"
   },
   "author": "Dominik Schöni",
   "license": "MIT",
