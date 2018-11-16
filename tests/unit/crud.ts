@@ -21,10 +21,8 @@ describe('CRUD', () => {
       database: 'typecrud-test',
       entities: ['src/database/entities/**/*.ts'],
       synchronize: true,
-      logging: false
+      dropSchema: true
     })
-
-    await connection.synchronize(true)
   })
 
   describe('POST', () => {

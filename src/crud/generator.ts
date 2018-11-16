@@ -48,7 +48,7 @@ export class TypeCrud {
   private paginatableRoutes: PaginatedRoute[] = []
   private routes: Route[] = []
 
-  constructor(model: typeof BaseEntity, path: string, validatorFunction: Function, crud: CRUDType[] = defaultCrudTypes) {
+  constructor(model: typeof BaseEntity, path: string, crud: CRUDType[] = defaultCrudTypes) {
     const uniqueCrud = crud.filter((x, i) => crud.indexOf(x) === i)
     this.router = Router()
 
@@ -63,7 +63,7 @@ export class TypeCrud {
       }
 
       const url = `${path}${missingParenthesis ? '/' : ''}${crudConstructor.defaultSuffix}`
-      const route = new crudConstructor.route(model, url, validatorFunction)
+      const route = new crudConstructor.route(model, url)
       const crudRouter = route.getRouter()
 
       // check if we support filterKeys

@@ -1,9 +1,10 @@
 import { Route, HTTPMethod } from '../route'
 import { BaseEntity, FindOneOptions, Not, IsNull } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
+import { classToPlain } from 'class-transformer'
 
 export class ReadOneRoute extends Route {
-  constructor(private model: typeof BaseEntity, path: string, validatorFunction?: Function) {
+  constructor(private model: typeof BaseEntity, path: string) {
     super(HTTPMethod.GET, path)
   }
 
@@ -21,6 +22,6 @@ export class ReadOneRoute extends Route {
       return response.sendStatus(404)
     }
 
-    return response.status(200).json(entity)
+    return response.status(200).json(classToPlain(entity))
   }
 }

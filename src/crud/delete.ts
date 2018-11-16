@@ -3,7 +3,7 @@ import { BaseEntity } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 
 export class DeleteRoute extends Route {
-  constructor(private model: typeof BaseEntity, path: string, validatorFunction?: Function) {
+  constructor(private model: typeof BaseEntity, path: string) {
     super(HTTPMethod.DELETE, path)
   }
 

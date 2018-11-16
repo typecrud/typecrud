@@ -1,13 +1,14 @@
 import { Route, HTTPMethod, FilterableRoute, SortableRoute, SortOrder, PaginatedRoute } from '../route'
 import { BaseEntity, FindManyOptions, IsNull } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
+import { classToPlain } from 'class-transformer'
 
 export class ReadRoute extends Route implements FilterableRoute, SortableRoute, PaginatedRoute {
   isPaginated = false
   filterKeys: string[] = []
   sortBy: { key: string; order: SortOrder } = { key: 'id', order: SortOrder.ASC }
 
-  constructor(private model: typeof BaseEntity, path: string, validatorFunction?: Function) {
+  constructor(private model: typeof BaseEntity, path: string) {
     super(HTTPMethod.GET, path)
   }
 
@@ -51,6 +52,6 @@ export class ReadRoute extends Route implements FilterableRoute, SortableRoute, 
       return response.status(200).json([])
     }
 
-    return response.status(200).json(entities)
+    return response.status(200).json(classToPlain(entities))
   }
 }

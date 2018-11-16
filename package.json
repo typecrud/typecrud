@@ -1,6 +1,6 @@
 {
   "name": "typecrud",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -8,10 +8,11 @@
     "build": "rimraf ./lib && tsc",
     "prepublish": "npm run build"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Dominik Schöni",
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "class-transformer": "^0.2.0",
     "class-validator": "^0.9.1",
     "express": "^4.16.4",
     "pg": "^7.5.0",

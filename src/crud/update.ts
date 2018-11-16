@@ -1,10 +1,11 @@
 import { Route, HTTPMethod } from '../route'
 import { BaseEntity } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
+import { classToPlain } from 'class-transformer'
 
 export class UpdateRoute extends Route {
-  constructor(private model: typeof BaseEntity, path: string, validatorFunction?: Function) {
-    super(HTTPMethod.PATCH, path, validatorFunction)
+  constructor(private model: typeof BaseEntity, path: string) {
+    super(HTTPMethod.PATCH, path)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
@@ -26,6 +27,6 @@ export class UpdateRoute extends Route {
     // save object if valid
     const savedEntity = await entity.save()
 
-    return response.status(200).json(savedEntity)
+    return response.status(200).json(classToPlain(savedEntity))
   }
 }
