@@ -32,6 +32,11 @@ export class ReadRoute extends Route implements FilterableRoute, SortableRoute, 
       Object.assign(query.where, { [this.softDeletionKey]: IsNull() })
     }
 
+    // mandatory query-filter
+    if (this.queryFilter) {
+      Object.assign(query.where, this.queryFilter(request))
+    }
+
     // paginate query
     if (this.isPaginated && skip && take) {
       query.take = take

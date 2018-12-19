@@ -2,31 +2,31 @@ import { CreateRoute } from './create'
 import { UpdateRoute } from './update'
 import { ReadRoute } from './read'
 import { DeleteRoute } from './delete'
-import { BaseEntity } from 'typeorm'
-import { Router } from 'express'
+import { BaseEntity, FindOperator } from 'typeorm'
+import { Router, Request } from 'express'
 import { ReadOneRoute } from './read-one'
 import { Route, FilterableRoute, SortOrder, SortableRoute, PaginatedRoute } from '../route'
 
 const crudConstructors = {
   0: {
     route: CreateRoute,
-    defaultSuffix: ''
+    defaultSuffix: '/'
   },
   1: {
     route: ReadRoute,
-    defaultSuffix: ''
+    defaultSuffix: '/'
   },
   2: {
     route: ReadOneRoute,
-    defaultSuffix: ':id'
+    defaultSuffix: '/:id'
   },
   3: {
     route: UpdateRoute,
-    defaultSuffix: ':id'
+    defaultSuffix: '/:id'
   },
   4: {
     route: DeleteRoute,
-    defaultSuffix: ':id'
+    defaultSuffix: '/:id'
   }
 }
 
@@ -48,22 +48,14 @@ export class TypeCrud {
   private paginatableRoutes: PaginatedRoute[] = []
   private routes: Route[] = []
 
-  constructor(model: typeof BaseEntity, path: string, crud: CRUDType[] = defaultCrudTypes) {
+  constructor(model: typeof BaseEntity, crud: CRUDType[] = defaultCrudTypes) {
     const uniqueCrud = crud.filter((x, i) => crud.indexOf(x) === i)
     this.router = Router()
 
     uniqueCrud.forEach(crud => {
       const crudConstructor = crudConstructors[crud]
-      let missingParenthesis = false
 
-      if (crudConstructor.defaultSuffix.length > 0) {
-        if (!path.endsWith('/')) {
-          missingParenthesis = true
-        }
-      }
-
-      const url = `${path}${missingParenthesis ? '/' : ''}${crudConstructor.defaultSuffix}`
-      const route = new crudConstructor.route(model, url)
+      const route = new crudConstructor.route(model, crudConstructor.defaultSuffix)
       const crudRouter = route.getRouter()
 
       // check if we support filterKeys
@@ -84,6 +76,14 @@ export class TypeCrud {
       this.routes.push(route)
       this.router.use(crudRouter)
     })
+  }
+
+  queryFilter(filter: (request: Request) => { [x: string]: FindOperator<any> }): TypeCrud {
+    this.routes.forEach(route => {
+      route.queryFilter = filter
+    })
+
+    return this
   }
 
   filterableBy(...filterKeys: string[]): TypeCrud {

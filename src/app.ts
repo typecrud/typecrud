@@ -9,7 +9,8 @@ const app = express()
 
 app.use(json())
 app.use(
-  new TypeCrud(User, '/api/v1/users')
+  '/api/v1/users',
+  new TypeCrud(User)
     .filterableBy('age', 'firstname')
     .sortBy('age', SortOrder.ASC)
     .paginate()
@@ -17,6 +18,6 @@ app.use(
     .includeRelations('events').router
 )
 
-app.use(new TypeCrud(Event, '/api/v1/events').router)
+app.use('/api/v1/events', new TypeCrud(Event).router)
 
 export { app }

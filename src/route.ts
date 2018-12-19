@@ -1,6 +1,6 @@
 import { Router, NextFunction, Response, Request } from 'express'
 import { asyncRequestHandler } from './middleware/async'
-import { BaseEntity, getManager } from 'typeorm'
+import { BaseEntity, getManager, FindOperator } from 'typeorm'
 import { ValidationError, validate } from 'class-validator'
 import 'reflect-metadata'
 
@@ -32,6 +32,7 @@ export interface PaginatedRoute {
 export abstract class Route {
   relations: string[] = []
   softDeletionKey?: string
+  queryFilter?: (request: Request) => { [x: string]: FindOperator<any> }
 
   constructor(private method: HTTPMethod, private path: string) {}
 

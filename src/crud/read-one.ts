@@ -16,6 +16,10 @@ export class ReadOneRoute extends Route {
       Object.assign(query, { where: { [this.softDeletionKey]: IsNull() } })
     }
 
+    if (this.queryFilter) {
+      Object.assign(query, { where: this.queryFilter(request) })
+    }
+
     const entity = await this.model.findOne(request.params.id, query)
 
     if (!entity) {

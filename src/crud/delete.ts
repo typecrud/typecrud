@@ -1,5 +1,5 @@
 import { Route, HTTPMethod } from '../route'
-import { BaseEntity } from 'typeorm'
+import { BaseEntity, FindOneOptions } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 
 export class DeleteRoute extends Route {
@@ -8,7 +8,14 @@ export class DeleteRoute extends Route {
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
-    const entity = await this.model.findOne(request.params.id)
+    const query: FindOneOptions<BaseEntity> = {}
+
+    // mandatory query-filter
+    if (this.queryFilter) {
+      Object.assign(query.where, this.queryFilter(request))
+    }
+
+    const entity = await this.model.findOne(request.params.id, query)
 
     if (!entity) {
       return response.sendStatus(404)
