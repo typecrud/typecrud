@@ -13,7 +13,7 @@ export class UpdateRoute extends Route {
 
     // mandatory query-filter
     if (this.queryFilter) {
-      Object.assign(query.where, this.queryFilter(request))
+      Object.assign(query, { where: this.queryFilter(request) })
     }
 
     const entity = await this.model.findOne(request.params.id, query)
