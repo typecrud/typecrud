@@ -1,7 +1,7 @@
 import { Route, HTTPMethod } from '../route'
 import { BaseEntity, FindOneOptions } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
-import { classToPlain, plainToClass } from 'class-transformer'
+import { classToPlain, plainToClass, plainToClassFromExist } from 'class-transformer'
 
 export class UpdateRoute extends Route {
   constructor(private model: typeof BaseEntity, path: string) {
@@ -23,19 +23,20 @@ export class UpdateRoute extends Route {
     }
 
     // convert request to class
-    const newClass = (plainToClass(this.model, request.body) as unknown) as BaseEntity
+    const newEntity = plainToClassFromExist<BaseEntity, Object>(entity, request.body)
 
     // validate object
-    const errors = await this.validateEntity(newClass)
+    const errors = await this.validateEntity(newEntity)
     if (errors && errors.length > 0) {
       return response.status(400).json(errors)
     }
 
-    // copy over all supplied params to entity
-    Object.assign(entity, newClass)
+    // do not save if ID is missing
+    if (!newEntity.hasId()) {
+      return response.sendStatus(400)
+    }
 
-    // save object if valid
-    const savedEntity = await entity.save()
+    const savedEntity = await newEntity.save()
 
     return response.status(200).json(classToPlain(savedEntity))
   }

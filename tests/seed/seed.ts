@@ -25,6 +25,7 @@ export class SeedGenerator {
       let event = new Event()
       event.user = users[i]
       event.name = 'Event' + i
+      event.startsAt = new Date()
       insertPromises.push(event.save())
     }
 

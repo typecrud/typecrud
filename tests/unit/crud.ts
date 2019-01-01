@@ -8,6 +8,8 @@ import { createConnection, Connection } from 'typeorm'
 import { User } from '../../src/database/entities/user'
 import { Event } from '../../src/database/entities/event'
 import { SeedGenerator } from './../seed/seed'
+import { classToPlain } from 'class-transformer'
+import { convertDates } from '../helpers/toDate'
 
 describe('CRUD', () => {
   let connection: Connection
@@ -27,18 +29,18 @@ describe('CRUD', () => {
 
   describe('POST', () => {
     it('should create an entity', done => {
-      const user = { firstname: 'Tester', lastname: 'Testibus', age: 50 }
+      const event = { name: 'TestName', startsAt: new Date() }
       request(app)
-        .post(`/api/v1/users`)
-        .send(user)
+        .post(`/api/v1/events`)
+        .send(event)
         .set('Accept', 'application/json')
         .expect(201)
         .end((err, res) => {
-          expect(res.body).to.contain(user)
-          if (err) {
+          if (err || res.status !== 201) {
             console.warn(res.body)
             return done(err)
           }
+          expect(res.body).to.contain(convertDates(classToPlain(event)))
           done()
         })
     })
@@ -180,6 +182,7 @@ describe('CRUD', () => {
     beforeEach(async () => {
       event = new Event()
       event.name = 'TestEvent'
+      event.startsAt = new Date()
       event = await event.save()
 
       user = new User()
