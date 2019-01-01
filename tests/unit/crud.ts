@@ -195,6 +195,7 @@ describe('CRUD', () => {
 
     it('should patch an existing record', done => {
       user.firstname = 'changedName'
+      let oldEventName = user.events[0].name
       user.events[0].name = 'TestEvent2'
       request(app)
         .patch(`/api/v1/users/${user.id}`)
@@ -204,7 +205,7 @@ describe('CRUD', () => {
         .end((err, res) => {
           expect(res.body.firstname).to.equal(user.firstname)
           expect(res.body.lastname).to.equal(user.lastname)
-          expect(res.body.events[0].name).to.equal('TestEvent2')
+          expect(res.body.events[0].name).to.equal(oldEventName)
           if (err) {
             console.warn(res.body)
             return done(err)
@@ -213,8 +214,9 @@ describe('CRUD', () => {
         })
     })
 
-    it('should patch an existing record with a nested object', done => {
+    it('should patch an existing record with a nested object, and leave said nested object intact', done => {
       user.firstname = 'changedName'
+      let oldEventName = user.events[0].name
       user.events[0].name = 'TestEvent2'
 
       request(app)
@@ -225,7 +227,28 @@ describe('CRUD', () => {
         .end((err, res) => {
           expect(res.body.firstname).to.equal(user.firstname)
           expect(res.body.lastname).to.equal(user.lastname)
-          expect(res.body.events[0].name).to.equal('TestEvent2')
+          expect(res.body.events[0].name).to.equal(oldEventName)
+          if (err) {
+            console.warn(res.body)
+            return done(err)
+          }
+          done()
+        })
+    })
+
+    it('should not overwrite relations', done => {
+      user.firstname = 'changedName'
+      user.events = []
+
+      request(app)
+        .patch(`/api/v1/users/${user.id}`)
+        .send(user)
+        .set('Accept', 'application/json')
+        .expect(200)
+        .end((err, res) => {
+          expect(res.body.firstname).to.equal(user.firstname)
+          expect(res.body.lastname).to.equal(user.lastname)
+          expect(res.body.events.length).to.equal(1)
           if (err) {
             console.warn(res.body)
             return done(err)

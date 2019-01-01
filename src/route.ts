@@ -42,9 +42,10 @@ export abstract class Route {
 
   abstract async requestHandler(request: Request, response: Response, next: NextFunction): Promise<void>
 
-  protected async validateEntity(entity: BaseEntity): Promise<ValidationError[]> {
+  protected async validateEntity(entity: BaseEntity, skipMissingProperties = false): Promise<ValidationError[]> {
     const errors = await validate(entity, {
       forbidUnknownValues: true,
+      skipMissingProperties: skipMissingProperties,
       validationError: {
         target: false
       }

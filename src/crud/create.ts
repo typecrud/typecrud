@@ -10,7 +10,7 @@ export class CreateRoute extends Route {
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
     // copy over all supplied params to entity
-    const newClass = (plainToClass(this.model, request.body) as unknown) as BaseEntity
+    const newClass = plainToClass<BaseEntity, Object>(this.model, request.body)
 
     // validate object
     const errors = await this.validateEntity(newClass)

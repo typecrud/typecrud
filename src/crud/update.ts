@@ -1,7 +1,7 @@
 import { Route, HTTPMethod } from '../route'
-import { BaseEntity, FindOneOptions } from 'typeorm'
+import { BaseEntity, FindOneOptions, IsNull } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
-import { classToPlain, plainToClass, plainToClassFromExist } from 'class-transformer'
+import { classToPlain, plainToClass } from 'class-transformer'
 
 export class UpdateRoute extends Route {
   constructor(private model: typeof BaseEntity, path: string) {
@@ -9,11 +9,16 @@ export class UpdateRoute extends Route {
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
-    const query: FindOneOptions<BaseEntity> = {}
+    const query: FindOneOptions<BaseEntity> = { where: {}, relations: this.relations }
+
+    // check for soft-deletion, filter those
+    if (this.softDeletionKey) {
+      Object.assign(query.where, { [this.softDeletionKey]: IsNull() })
+    }
 
     // mandatory query-filter
     if (this.queryFilter) {
-      Object.assign(query, { where: this.queryFilter(request), relations: this.relations })
+      Object.assign(query.where, this.queryFilter(request))
     }
 
     const entity = await this.model.findOne(request.params.id, query)
@@ -23,20 +28,23 @@ export class UpdateRoute extends Route {
     }
 
     // convert request to class
-    const newEntity = plainToClassFromExist<BaseEntity, Object>(entity, request.body)
+    const newEntity = plainToClass<BaseEntity, Object>(this.model, request.body)
 
-    // validate object
-    const errors = await this.validateEntity(newEntity)
+    // validate object, skip missing properties
+    const errors = await this.validateEntity(newEntity, true)
     if (errors && errors.length > 0) {
       return response.status(400).json(errors)
     }
 
-    // do not save if ID is missing
-    if (!newEntity.hasId()) {
-      return response.sendStatus(400)
-    }
+    // only copy over existing properties (no relations or such)
+    Object.keys(newEntity)
+      .filter(key => this.relations.indexOf(key) === -1)
+      .filter(key => key !== 'id')
+      .forEach(key => {
+        ;(entity as any)[key] = (newEntity as any)[key]
+      })
 
-    const savedEntity = await newEntity.save()
+    const savedEntity = await entity.save()
 
     return response.status(200).json(classToPlain(savedEntity))
   }
