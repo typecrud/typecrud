@@ -1,5 +1,5 @@
 import { Route, HTTPMethod, FilterableRoute, SortableRoute, SortOrder, PaginatedRoute } from '../route'
-import { BaseEntity, FindManyOptions, IsNull } from 'typeorm'
+import { BaseEntity, FindManyOptions, IsNull, Not } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain } from 'class-transformer'
 
@@ -21,7 +21,13 @@ export class ReadRoute extends Route implements FilterableRoute, SortableRoute, 
 
     this.filterKeys.forEach(key => {
       if (request.query[key]) {
-        filterBy[key] = request.query[key] === 'null' ? IsNull() : request.query[key]
+        filterBy[key] = request.query[key]
+        if (request.query[key] === 'null') {
+          filterBy[key] = IsNull()
+        }
+        if (request.query[key] === '!null') {
+          filterBy[key] = Not(IsNull())
+        }
       }
     })
 
