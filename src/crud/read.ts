@@ -21,7 +21,7 @@ export class ReadRoute extends Route implements FilterableRoute, SortableRoute, 
 
     this.filterKeys.forEach(key => {
       if (request.query[key]) {
-        filterBy[key] = request.query[key]
+        filterBy[key] = request.query[key] === 'null' ? IsNull() : request.query[key]
       }
     })
 
