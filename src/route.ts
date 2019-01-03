@@ -32,9 +32,13 @@ export interface PaginatedRoute {
 export abstract class Route {
   relations: string[] = []
   softDeletionKey?: string
+
+  preEntityHooks: { [x: string]: (request: Request, entity: BaseEntity) => void | Promise<void> } = {}
+  postEntityHooks: { [x: string]: (request: Request, entity: BaseEntity) => void | Promise<void> } = {}
+
   queryFilter?: (request: Request) => { [x: string]: FindOperator<any> }
 
-  constructor(private method: HTTPMethod, private path: string) {}
+  constructor(protected method: HTTPMethod, private path: string) {}
 
   getRouter(): Router {
     return (Router() as any)[this.method.toLowerCase()](this.path, asyncRequestHandler(this.requestHandler.bind(this)))
@@ -52,6 +56,18 @@ export abstract class Route {
     })
 
     return errors
+  }
+
+  protected async preEntityHook(request: Request, entity: BaseEntity) {
+    if (this.preEntityHooks[this.method]) {
+      this.preEntityHooks[this.method](request, entity)
+    }
+  }
+
+  protected async postEntityHook(request: Request, entity: BaseEntity) {
+    if (this.postEntityHooks[this.method]) {
+      this.postEntityHooks[this.method](request, entity)
+    }
   }
 
   async queryBuilder(entity: typeof BaseEntity): Promise<BaseEntity[]> {

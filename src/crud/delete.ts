@@ -21,6 +21,9 @@ export class DeleteRoute extends Route {
       return response.sendStatus(404)
     }
 
+    // execute pre-operation hook
+    await this.preEntityHook(request, entity)
+
     // check if entity is able to be soft-deleted
     if (this.softDeletionKey) {
       ;(entity as any)[this.softDeletionKey] = new Date()
@@ -28,6 +31,9 @@ export class DeleteRoute extends Route {
     } else {
       await entity.remove()
     }
+
+    // execute pre-operation hook
+    await this.preEntityHook(request, entity)
 
     return response.sendStatus(204)
   }

@@ -300,6 +300,36 @@ describe('CRUD', () => {
     })
   })
 
+  describe('RELATIONS', () => {
+    let user: User
+    let event: Event
+
+    beforeEach(async () => {
+      event = new Event()
+      event.name = 'TestEvent'
+      event.startsAt = new Date()
+      event = await event.save()
+
+      user = new User()
+      user.firstname = 'Tester'
+      user.lastname = 'Testibus'
+      user.age = 50
+      user.events = [event]
+      user = await user.save()
+    })
+
+    it('should correctly update relations', async () => {
+      const result = await request(app)
+        .patch(`/api/v1/events/${event.id}`)
+        .send({ user: null })
+        .set('Accept', 'application/json')
+        .expect(200)
+
+      expect(result.body.event).not.to.equal(user.id)
+      expect(result.body.event).to.be.undefined
+    })
+  })
+
   afterEach(done => {
     connection.close()
     done()

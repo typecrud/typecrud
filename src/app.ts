@@ -2,7 +2,7 @@ import * as express from 'express'
 import { json } from 'body-parser'
 import { User } from './database/entities/user'
 import { TypeCrud } from './crud/generator'
-import { SortOrder } from './route'
+import { SortOrder, HTTPMethod } from './route'
 import { Event } from './database/entities/event'
 
 const app = express()
@@ -15,6 +15,11 @@ app.use(
     .sortBy('age', SortOrder.ASC)
     .paginate()
     .softDeletable('deletedAt')
+    .hooks({
+      pre: {
+        [HTTPMethod.POST]: (request, entity) => {}
+      }
+    })
     .includeRelations('events').router
 )
 

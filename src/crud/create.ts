@@ -18,8 +18,14 @@ export class CreateRoute extends Route {
       return response.status(400).json(errors)
     }
 
+    // execute pre-operation hook
+    await this.preEntityHook(request, newClass)
+
     // save object if valid
     const savedEntity = await newClass.save()
+
+    // execute post-operation hook
+    await this.postEntityHook(request, savedEntity)
 
     return response.status(201).json(classToPlain(savedEntity))
   }

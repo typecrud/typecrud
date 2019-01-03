@@ -44,7 +44,13 @@ export class UpdateRoute extends Route {
         ;(entity as any)[key] = (newEntity as any)[key]
       })
 
+    // execute pre-operation hook
+    await this.preEntityHook(request, entity)
+
     const savedEntity = await entity.save()
+
+    // execute post-operation hook
+    await this.postEntityHook(request, savedEntity)
 
     return response.status(200).json(classToPlain(savedEntity))
   }

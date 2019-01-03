@@ -78,6 +78,18 @@ export class TypeCrud {
     })
   }
 
+  hooks(hooks: {
+    pre?: { [x: string]: (request: Request, entity: BaseEntity) => void | Promise<void> }
+    post?: { [x: string]: (request: Request, entity: BaseEntity) => void | Promise<void> }
+  }) {
+    this.routes.forEach(route => {
+      if (hooks.pre) route.preEntityHooks = hooks.pre
+      if (hooks.post) route.postEntityHooks = hooks.post
+    })
+
+    return this
+  }
+
   queryFilter(filter: (request: Request) => { [x: string]: FindOperator<any> }): TypeCrud {
     this.routes.forEach(route => {
       route.queryFilter = filter
