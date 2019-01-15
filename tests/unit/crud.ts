@@ -148,7 +148,22 @@ describe('CRUD', () => {
         })
     })
 
-    it('should properly paginate records', done => {
+    it('should properly paginate records with skip 0', done => {
+      request(app)
+        .get(`/api/v1/users?skip=0&limit=10`)
+        .set('Accept', 'application/json')
+        .expect(200)
+        .end((err, res) => {
+          expect(res.body.length).to.equal(10)
+          if (err) {
+            console.warn(res.body)
+            return done(err)
+          }
+          done()
+        })
+    })
+
+    it('should properly skip and limit records', done => {
       request(app)
         .get(`/api/v1/users?skip=10&limit=10`)
         .set('Accept', 'application/json')

@@ -1,5 +1,5 @@
 import { Route, HTTPMethod, FilterableRoute, SortableRoute, SortOrder, PaginatedRoute } from '../route'
-import { BaseEntity, FindManyOptions, IsNull, Not } from 'typeorm'
+import { BaseEntity, FindManyOptions, IsNull, Not, LessThan, MoreThan } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain } from 'class-transformer'
 
@@ -44,7 +44,7 @@ export class ReadRoute extends Route implements FilterableRoute, SortableRoute, 
     }
 
     // paginate query
-    if (this.isPaginated && skip && take) {
+    if (this.isPaginated && skip >= 0 && take >= 0) {
       query.take = take
       query.skip = skip
     }
