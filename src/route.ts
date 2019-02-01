@@ -33,8 +33,8 @@ export abstract class Route {
   relations: string[] = []
   softDeletionKey?: string
 
-  preEntityHooks: { [x: string]: (request: Request, entity: BaseEntity) => void | Promise<void> } = {}
-  postEntityHooks: { [x: string]: (request: Request, entity: BaseEntity) => void | Promise<void> } = {}
+  preEntityHooks: { [x: string]: (request: Request, entity: typeof BaseEntity) => void | Promise<void> } = {}
+  postEntityHooks: { [x: string]: (request: Request, entity: typeof BaseEntity) => void | Promise<void> } = {}
 
   queryFilter?: (request: Request) => { [x: string]: FindOperator<any> }
 
@@ -58,13 +58,13 @@ export abstract class Route {
     return errors
   }
 
-  protected async preEntityHook(request: Request, entity: BaseEntity) {
+  protected async preEntityHook(request: Request, entity: typeof BaseEntity) {
     if (this.preEntityHooks[this.method]) {
       this.preEntityHooks[this.method](request, entity)
     }
   }
 
-  protected async postEntityHook(request: Request, entity: BaseEntity) {
+  protected async postEntityHook(request: Request, entity: typeof BaseEntity) {
     if (this.postEntityHooks[this.method]) {
       this.postEntityHooks[this.method](request, entity)
     }
