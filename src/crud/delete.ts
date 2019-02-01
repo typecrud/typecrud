@@ -2,7 +2,7 @@ import { Route, HTTPMethod } from '../route'
 import { BaseEntity, FindOneOptions } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 
-export class DeleteRoute extends Route {
+export class DeleteRoute<T extends BaseEntity> extends Route<T> {
   constructor(private model: typeof BaseEntity, path: string) {
     super(HTTPMethod.DELETE, path)
   }
@@ -22,7 +22,7 @@ export class DeleteRoute extends Route {
     }
 
     // execute pre-operation hook
-    await this.preEntityHook(request, entity)
+    await this.preEntityHook(request, entity as T)
 
     // check if entity is able to be soft-deleted
     if (this.softDeletionKey) {
@@ -33,7 +33,7 @@ export class DeleteRoute extends Route {
     }
 
     // execute pre-operation hook
-    await this.preEntityHook(request, entity)
+    await this.preEntityHook(request, entity as T)
 
     return response.sendStatus(204)
   }

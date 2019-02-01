@@ -1,9 +1,9 @@
 import { Route, HTTPMethod } from '../route'
-import { BaseEntity, FindOneOptions, Not, IsNull } from 'typeorm'
+import { BaseEntity, FindOneOptions, IsNull } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain } from 'class-transformer'
 
-export class ReadOneRoute extends Route {
+export class ReadOneRoute<T extends BaseEntity> extends Route<T> {
   constructor(private model: typeof BaseEntity, path: string) {
     super(HTTPMethod.GET, path)
   }

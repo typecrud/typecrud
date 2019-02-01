@@ -10,19 +10,20 @@ const app = express()
 app.use(json())
 app.use(
   '/api/v1/users',
-  new TypeCrud(User)
-    .filterableBy('age', 'firstname')
-    .sortBy('age', SortOrder.ASC)
-    .paginate()
-    .softDeletable('deletedAt')
-    .hooks({
+  new TypeCrud<User>(User, {
+    filterBy: ['age', 'firstname'],
+    sortBy: { key: 'age', order: SortOrder.ASC },
+    isPaginatable: true,
+    softDeleteBy: 'deletedAt',
+    hooks: {
       pre: {
-        [HTTPMethod.POST]: (request, entity) => {}
+        [HTTPMethod.POST]: (request, entity: User) => {}
       }
-    })
-    .includeRelations('events').router
+    },
+    includeRelations: ['events']
+  }).router
 )
 
-app.use('/api/v1/events', new TypeCrud(Event).router)
+app.use('/api/v1/events', new TypeCrud<Event>(Event).router)
 
 export { app }

@@ -3,7 +3,7 @@ import { BaseEntity } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain, plainToClass } from 'class-transformer'
 
-export class CreateRoute extends Route {
+export class CreateRoute<T extends BaseEntity> extends Route<T> {
   constructor(private model: typeof BaseEntity, path: string) {
     super(HTTPMethod.POST, path)
   }
@@ -19,13 +19,13 @@ export class CreateRoute extends Route {
     }
 
     // execute pre-operation hook
-    await this.preEntityHook(request, newClass)
+    await this.preEntityHook(request, newClass as T)
 
     // save object if valid
     const savedEntity = await newClass.save()
 
     // execute post-operation hook
-    await this.postEntityHook(request, savedEntity)
+    await this.postEntityHook(request, savedEntity as T)
 
     return response.status(201).json(classToPlain(savedEntity))
   }

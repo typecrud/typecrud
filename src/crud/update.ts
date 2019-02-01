@@ -3,7 +3,7 @@ import { BaseEntity, FindOneOptions, IsNull } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain, plainToClass } from 'class-transformer'
 
-export class UpdateRoute extends Route {
+export class UpdateRoute<T extends BaseEntity> extends Route<T> {
   constructor(private model: typeof BaseEntity, path: string) {
     super(HTTPMethod.PATCH, path)
   }
@@ -45,12 +45,12 @@ export class UpdateRoute extends Route {
       })
 
     // execute pre-operation hook
-    await this.preEntityHook(request, entity)
+    await this.preEntityHook(request, entity as T)
 
     const savedEntity = await entity.save()
 
     // execute post-operation hook
-    await this.postEntityHook(request, savedEntity)
+    await this.postEntityHook(request, savedEntity as T)
 
     return response.status(200).json(classToPlain(savedEntity))
   }

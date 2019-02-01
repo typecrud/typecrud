@@ -1,9 +1,9 @@
 import { Route, HTTPMethod, FilterableRoute, SortableRoute, SortOrder, PaginatedRoute } from '../route'
-import { BaseEntity, FindManyOptions, IsNull, Not, LessThan, MoreThan } from 'typeorm'
+import { BaseEntity, FindManyOptions, IsNull, Not } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain } from 'class-transformer'
 
-export class ReadRoute extends Route implements FilterableRoute, SortableRoute, PaginatedRoute {
+export class ReadRoute<T extends BaseEntity> extends Route<T> implements FilterableRoute, SortableRoute, PaginatedRoute {
   isPaginated = false
   filterKeys: string[] = []
   sortBy: { key: string; order: SortOrder } = { key: 'id', order: SortOrder.ASC }

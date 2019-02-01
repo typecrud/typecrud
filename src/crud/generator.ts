@@ -38,49 +38,80 @@ export enum CRUDType {
   Delete
 }
 
+export interface TypeCrudConfig<T> {
+  crudTypes?: CRUDType[]
+  queryFilter?: (request: Request) => { [x: string]: FindOperator<any> }
+  filterBy?: string[]
+  sortBy?: { key: string; order: SortOrder }
+  softDeleteBy?: string
+  isPaginatable?: boolean
+  includeRelations?: string[]
+  hooks?: {
+    pre?: { [x: string]: (request: Request, entity: T) => void | Promise<void> }
+    post?: { [x: string]: (request: Request, entity: T) => void | Promise<void> }
+  }
+}
+
 const defaultCrudTypes = [CRUDType.Create, CRUDType.ReadOne, CRUDType.Read, CRUDType.Update, CRUDType.Delete]
 
-export class TypeCrud {
+export class TypeCrud<T extends BaseEntity> {
   router: Router
 
   private filterableRoutes: FilterableRoute[] = []
   private sortableRoutes: SortableRoute[] = []
   private paginatableRoutes: PaginatedRoute[] = []
-  private routes: Route[] = []
+  private routes: Route<T>[] = []
 
-  constructor(model: typeof BaseEntity, crud: CRUDType[] = defaultCrudTypes) {
+  constructor(model: typeof BaseEntity, config: TypeCrudConfig<T> = {} as TypeCrudConfig<T>) {
+    const crud = config.crudTypes || defaultCrudTypes
     const uniqueCrud = crud.filter((x, i) => crud.indexOf(x) === i)
     this.router = Router()
 
     uniqueCrud.forEach(crud => {
       const crudConstructor = crudConstructors[crud]
 
-      const route = new crudConstructor.route(model, crudConstructor.defaultSuffix)
+      const route = this.routeFactory(crudConstructor.route, model, crudConstructor.defaultSuffix)
       const crudRouter = route.getRouter()
 
       // check if we support filterKeys
       if ((route as any).filterKeys !== undefined) {
-        this.filterableRoutes.push(route as FilterableRoute)
+        this.filterableRoutes.push(route as any)
       }
 
       // check if we support filterKeys
       if ((route as any).sortBy !== undefined) {
-        this.sortableRoutes.push(route as SortableRoute)
+        this.sortableRoutes.push(route as any)
       }
 
       // check if route is paginated
       if ((route as any).isPaginated !== undefined) {
-        this.paginatableRoutes.push(route as PaginatedRoute)
+        this.paginatableRoutes.push(route as any)
       }
 
       this.routes.push(route)
       this.router.use(crudRouter)
     })
+
+    if (config.queryFilter) this.queryFilter(config.queryFilter)
+    if (config.filterBy) this.filterBy(config.filterBy)
+    if (config.sortBy) this.sortBy(config.sortBy)
+    if (config.isPaginatable) this.isPaginatable(config.isPaginatable)
+    if (config.includeRelations) this.includeRelations(config.includeRelations)
+    if (config.softDeleteBy) this.softDeleteBy(config.softDeleteBy)
+    if (config.hooks) this.hooks(config.hooks)
   }
 
-  hooks(hooks: {
-    pre?: { [x: string]: (request: Request, entity: BaseEntity) => void | Promise<void> }
-    post?: { [x: string]: (request: Request, entity: BaseEntity) => void | Promise<void> }
+  private routeFactory(
+    type: new (model: typeof BaseEntity, path: string) => Route<T>,
+    model: typeof BaseEntity,
+    defaultSuffix: string
+  ): Route<T> {
+    return new type(model, defaultSuffix)
+  }
+
+  private hooks(hooks: {
+    pre?: { [x: string]: (request: Request, entity: T) => void | Promise<void> }
+    post?: { [x: string]: (request: Request, entity: T) => void | Promise<void> }
   }) {
     this.routes.forEach(route => {
       if (hooks.pre) route.preEntityHooks = hooks.pre
@@ -90,51 +121,39 @@ export class TypeCrud {
     return this
   }
 
-  queryFilter(filter: (request: Request) => { [x: string]: FindOperator<any> }): TypeCrud {
+  private queryFilter(filter: (request: Request) => { [x: string]: FindOperator<any> }) {
     this.routes.forEach(route => {
       route.queryFilter = filter
     })
-
-    return this
   }
 
-  filterableBy(...filterKeys: string[]): TypeCrud {
+  private filterBy(filterKeys: string[]) {
     this.filterableRoutes.forEach(route => {
       route.filterKeys = filterKeys
     })
-
-    return this
   }
 
-  sortBy(key: string, order: SortOrder): TypeCrud {
+  private sortBy(config: { key: string; order: SortOrder }) {
     this.sortableRoutes.forEach(route => {
-      route.sortBy = { key: key, order: order }
+      route.sortBy = { key: config.key, order: config.order }
     })
-
-    return this
   }
 
-  paginate(isPaginatable: boolean = true): TypeCrud {
+  private isPaginatable(isPaginatable: boolean) {
     this.paginatableRoutes.forEach(route => {
       route.isPaginated = isPaginatable
     })
-
-    return this
   }
 
-  includeRelations(...relations: string[]): TypeCrud {
+  private includeRelations(relations: string[]) {
     this.routes.forEach(route => {
       route.relations = relations
     })
-
-    return this
   }
 
-  softDeletable(softDeletionKey: string): TypeCrud {
+  private softDeleteBy(softDeletionKey: string) {
     this.routes.forEach(route => {
       route.softDeletionKey = softDeletionKey
     })
-
-    return this
   }
 }
