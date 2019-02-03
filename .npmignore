@@ -1,0 +1,6 @@
+ormconfig.json
+tests/
+src/
+tests/
+.prettierrc
+tsconfig.json

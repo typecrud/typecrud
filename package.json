@@ -1,14 +1,15 @@
 {
   "name": "typecrud",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Easily generate CRUD REST-endpoints for express.js, from your TypeORM entities.",
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register tests/unit/**/**.ts",
     "build": "rimraf ./lib && tsc",
     "prepare": "npm run build"
   },
-  "author": "Dominik Schöni",
+  "author": "Dominik Schöni <info@theelysianfields.ch>",
+  "homepage": "https://github.com/typecrud/typecrud/",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.3",
