@@ -5,7 +5,7 @@ import { DeleteRoute } from './delete'
 import { BaseEntity, FindOperator } from 'typeorm'
 import { Router, Request } from 'express'
 import { ReadOneRoute } from './read-one'
-import { Route, FilterableRoute, SortOrder, SortableRoute, PaginatedRoute } from '../route'
+import { Route, FilterableRoute, SortableRoute, PaginatedRoute, Order } from '../route'
 
 const crudConstructors = {
   0: {
@@ -42,7 +42,8 @@ export interface TypeCrudConfig<T> {
   crudTypes?: CRUDType[]
   queryFilter?: (request: Request) => { [x: string]: FindOperator<any> }
   filterBy?: string[]
-  sortBy?: { key: string; order: SortOrder }
+  orderBy?: { key: string; order: Order }
+  orderKeys?: string[]
   softDeleteBy?: string
   isPaginatable?: boolean
   includeRelations?: string[]
@@ -79,7 +80,7 @@ export class TypeCrud<T extends BaseEntity> {
       }
 
       // check if we support filterKeys
-      if ((route as any).sortBy !== undefined) {
+      if ((route as any).orderBy !== undefined) {
         this.sortableRoutes.push(route as any)
       }
 
@@ -94,7 +95,8 @@ export class TypeCrud<T extends BaseEntity> {
 
     if (config.queryFilter) this.queryFilter(config.queryFilter)
     if (config.filterBy) this.filterBy(config.filterBy)
-    if (config.sortBy) this.sortBy(config.sortBy)
+    if (config.orderBy) this.orderBy(config.orderBy)
+    if (config.orderKeys) this.orderKeys(config.orderKeys)
     if (config.isPaginatable) this.isPaginatable(config.isPaginatable)
     if (config.includeRelations) this.includeRelations(config.includeRelations)
     if (config.softDeleteBy) this.softDeleteBy(config.softDeleteBy)
@@ -133,9 +135,15 @@ export class TypeCrud<T extends BaseEntity> {
     })
   }
 
-  private sortBy(config: { key: string; order: SortOrder }) {
+  private orderBy(config: { key: string; order: Order }) {
     this.sortableRoutes.forEach(route => {
-      route.sortBy = { key: config.key, order: config.order }
+      route.orderBy = { key: config.key, order: config.order }
+    })
+  }
+
+  private orderKeys(orderKeys: string[]) {
+    this.sortableRoutes.forEach(route => {
+      route.orderKeys = orderKeys
     })
   }
 

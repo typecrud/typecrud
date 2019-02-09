@@ -12,7 +12,7 @@ export enum HTTPMethod {
   DELETE = 'DELETE'
 }
 
-export enum SortOrder {
+export enum Order {
   ASC = 'ASC',
   DESC = 'DESC'
 }
@@ -22,7 +22,8 @@ export interface FilterableRoute {
 }
 
 export interface SortableRoute {
-  sortBy: { key: string; order: SortOrder }
+  orderBy: { key: string; order: Order } | null
+  orderKeys: string[]
 }
 
 export interface PaginatedRoute {

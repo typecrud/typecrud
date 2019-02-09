@@ -1,4 +1,4 @@
-import { Route, HTTPMethod, FilterableRoute, SortableRoute, SortOrder, PaginatedRoute } from '../route'
+import { Route, HTTPMethod, FilterableRoute, SortableRoute, PaginatedRoute, Order } from '../route'
 import { BaseEntity, FindManyOptions, IsNull, Not } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain } from 'class-transformer'
@@ -6,7 +6,8 @@ import { classToPlain } from 'class-transformer'
 export class ReadRoute<T extends BaseEntity> extends Route<T> implements FilterableRoute, SortableRoute, PaginatedRoute {
   isPaginated = false
   filterKeys: string[] = []
-  sortBy: { key: string; order: SortOrder } = { key: 'id', order: SortOrder.ASC }
+  orderBy: { key: string; order: Order } | null = null
+  orderKeys: string[] = []
 
   constructor(private model: typeof BaseEntity, path: string) {
     super(HTTPMethod.GET, path)
@@ -14,7 +15,21 @@ export class ReadRoute<T extends BaseEntity> extends Route<T> implements Filtera
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
     let filterBy: any = {}
-    let sortBy = { [this.sortBy.key]: this.sortBy.order }
+
+    let orderQuery
+
+    // sorting
+    if (this.orderBy !== null) {
+      orderQuery = { [this.orderBy.key]: this.orderBy.order || Order.ASC }
+    }
+
+    if (request.query.orderBy && this.orderKeys.some(val => val === request.query.orderBy)) {
+      orderQuery = { [request.query.orderBy]: Order.ASC }
+
+      if (request.query.sortOrder) {
+        orderQuery[request.query.orderBy] = request.query.sortOrder.toUpperCase() === Order.ASC ? Order.ASC : Order.DESC
+      }
+    }
 
     let skip = parseInt(request.query.skip)
     let take = parseInt(request.query.limit)
@@ -31,7 +46,11 @@ export class ReadRoute<T extends BaseEntity> extends Route<T> implements Filtera
       }
     })
 
-    const query: FindManyOptions<BaseEntity> = { where: filterBy, order: sortBy, relations: this.relations }
+    const query: FindManyOptions<BaseEntity> = { where: filterBy, relations: this.relations }
+
+    if (orderQuery) {
+      Object.assign(query, { order: orderQuery })
+    }
 
     // check for soft-deletion, filter those
     if (this.softDeletionKey) {
