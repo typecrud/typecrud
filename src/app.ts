@@ -20,7 +20,7 @@ app.use(
         [HTTPMethod.POST]: (request, entity: User) => {}
       }
     },
-    includeRelations: ['events']
+    includeRelations: ['events', 'tags']
   }).router
 )
 

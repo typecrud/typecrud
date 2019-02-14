@@ -1,10 +1,10 @@
 {
   "name": "typecrud",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Easily generate CRUD REST-endpoints for express.js, from your TypeORM entities.",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register tests/unit/**/**.ts",
+    "test": "mocha -r ts-node/register tests/unit/**/**.ts --timeout=10000",
     "build": "rimraf ./lib && tsc",
     "prepare": "npm run build"
   },

@@ -198,28 +198,32 @@ describe('CRUD', () => {
       event = new Event()
       event.name = 'TestEvent'
       event.startsAt = new Date()
-      event = await event.save()
 
       user = new User()
       user.firstname = 'Tester'
       user.lastname = 'Testibus'
       user.age = 50
-      user.events = [event]
       user = await user.save()
+
+      // save event later due to persistence: false flag
+      event.user = user
+      event = await event.save()
     })
 
     it('should patch an existing record', done => {
-      user.firstname = 'changedName'
-      let oldEventName = user.events[0].name
-      user.events[0].name = 'TestEvent2'
+      const userBody = classToPlain(user) as any
+      userBody.firstname = 'changedName'
+      let oldEventName = event.name
+      userBody.events = [classToPlain(event)]
+      userBody.events[0].name = 'TestEvent2'
       request(app)
-        .patch(`/api/v1/users/${user.id}`)
-        .send(user)
+        .patch(`/api/v1/users/${userBody.id}`)
+        .send(userBody)
         .set('Accept', 'application/json')
         .expect(200)
         .end((err, res) => {
-          expect(res.body.firstname).to.equal(user.firstname)
-          expect(res.body.lastname).to.equal(user.lastname)
+          expect(res.body.firstname).to.equal(userBody.firstname)
+          expect(res.body.lastname).to.equal(userBody.lastname)
           expect(res.body.events[0].name).to.equal(oldEventName)
           if (err) {
             console.warn(res.body)
@@ -229,19 +233,22 @@ describe('CRUD', () => {
         })
     })
 
-    it('should patch an existing record with a nested object, and leave said nested object intact', done => {
-      user.firstname = 'changedName'
-      let oldEventName = user.events[0].name
-      user.events[0].name = 'TestEvent2'
+    it('should patch an existing record with a nested object, and leave said nested object intact if defined so', done => {
+      const userBody = classToPlain(user) as any
+
+      userBody.firstname = 'changedName'
+      let oldEventName = event.name
+      userBody.events = [classToPlain(event)]
+      userBody.events[0].name = 'TestEvent2'
 
       request(app)
-        .patch(`/api/v1/users/${user.id}`)
-        .send(user)
+        .patch(`/api/v1/users/${userBody.id}`)
+        .send(userBody)
         .set('Accept', 'application/json')
         .expect(200)
         .end((err, res) => {
-          expect(res.body.firstname).to.equal(user.firstname)
-          expect(res.body.lastname).to.equal(user.lastname)
+          expect(res.body.firstname).to.equal(userBody.firstname)
+          expect(res.body.lastname).to.equal(userBody.lastname)
           expect(res.body.events[0].name).to.equal(oldEventName)
           if (err) {
             console.warn(res.body)
@@ -264,6 +271,30 @@ describe('CRUD', () => {
           expect(res.body.firstname).to.equal(user.firstname)
           expect(res.body.lastname).to.equal(user.lastname)
           expect(res.body.events.length).to.equal(1)
+          if (err) {
+            console.warn(res.body)
+            return done(err)
+          }
+          done()
+        })
+    })
+
+    it('should insert new related objects if scheme says so', done => {
+      const userBody = classToPlain(user) as any
+
+      userBody.tags = [
+        {
+          name: 'test-tag'
+        }
+      ]
+
+      request(app)
+        .patch(`/api/v1/users/${userBody.id}`)
+        .send(userBody)
+        .set('Accept', 'application/json')
+        .expect(200)
+        .end((err, res) => {
+          expect(res.body.tags.length).to.equal(1)
           if (err) {
             console.warn(res.body)
             return done(err)

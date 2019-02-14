@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 import { IsInt, IsNotEmpty, Length, Min, Max } from 'class-validator'
 import { Event } from './event'
+import { Tag } from './tag'
 
 @Entity()
 export class User extends BaseEntity {
@@ -23,7 +24,10 @@ export class User extends BaseEntity {
   @Column()
   age!: number
 
-  @OneToMany(type => Event, event => event.user)
+  @OneToMany(type => Tag, tag => tag.user, { cascade: ['insert'] })
+  tags!: Tag[]
+
+  @OneToMany(type => Event, event => event.user, { persistence: false })
   events!: Event[]
 
   @CreateDateColumn()

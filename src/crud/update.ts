@@ -21,12 +21,6 @@ export class UpdateRoute<T extends BaseEntity> extends Route<T> {
       Object.assign(query.where, this.queryFilter(request))
     }
 
-    const entity = await this.model.findOne(request.params.id, query)
-
-    if (!entity) {
-      return response.sendStatus(404)
-    }
-
     // convert request to class
     const newEntity = plainToClass<BaseEntity, Object>(this.model, request.body)
 
@@ -36,22 +30,27 @@ export class UpdateRoute<T extends BaseEntity> extends Route<T> {
       return response.status(400).json(errors)
     }
 
-    // only copy over existing properties (no relations or such)
-    Object.keys(newEntity)
-      .filter(key => this.relations.indexOf(key) === -1)
-      .filter(key => key !== 'id')
-      .forEach(key => {
-        ;(entity as any)[key] = (newEntity as any)[key]
-      })
+    // load existing entity from DB
+    const entity = await this.model.findOne(request.params.id, query)
+
+    if (!entity) {
+      return response.sendStatus(404)
+    }
+
+    this.model.merge(entity, newEntity)
 
     // execute pre-operation hook
     await this.preEntityHook(request, entity as T)
 
-    const savedEntity = await entity.save()
+    // save merged entity
+    await entity.save()
+
+    // load existing entity from DB
+    const savedEntitiy = await this.model.findOne(request.params.id, query)
 
     // execute post-operation hook
-    await this.postEntityHook(request, savedEntity as T)
+    await this.postEntityHook(request, savedEntitiy as T)
 
-    return response.status(200).json(classToPlain(savedEntity))
+    return response.status(200).json(classToPlain(savedEntitiy))
   }
 }
