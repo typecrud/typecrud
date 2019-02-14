@@ -1,4 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm'
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BaseEntity,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToMany,
+  JoinTable
+} from 'typeorm'
 import { IsInt, IsNotEmpty, Length, Min, Max } from 'class-validator'
 import { Event } from './event'
 import { Tag } from './tag'
@@ -24,7 +34,8 @@ export class User extends BaseEntity {
   @Column()
   age!: number
 
-  @OneToMany(type => Tag, tag => tag.user, { cascade: ['insert'] })
+  @ManyToMany(type => Tag, tag => tag.users, { cascade: ['insert', 'remove'] })
+  @JoinTable()
   tags!: Tag[]
 
   @OneToMany(type => Event, event => event.user, { persistence: false })

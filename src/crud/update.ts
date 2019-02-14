@@ -39,6 +39,13 @@ export class UpdateRoute<T extends BaseEntity> extends Route<T> {
 
     this.model.merge(entity, newEntity)
 
+    // relations shouldn't be merged, this makes it impossible to remove relations
+    for (const relation of this.relations) {
+      if ((newEntity as any)[relation] && Array.isArray((newEntity as any)[relation])) {
+        ;(entity as any)[relation] = (newEntity as any)[relation]
+      }
+    }
+
     // execute pre-operation hook
     await this.preEntityHook(request, entity as T)
 

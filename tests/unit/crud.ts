@@ -10,6 +10,7 @@ import { Event } from '../../src/database/entities/event'
 import { SeedGenerator } from './../seed/seed'
 import { classToPlain } from 'class-transformer'
 import { convertDates } from '../helpers/toDate'
+import { Tag } from '../../src/database/entities/tag'
 
 describe('CRUD', () => {
   let connection: Connection
@@ -301,6 +302,23 @@ describe('CRUD', () => {
           }
           done()
         })
+    })
+
+    it('should remove related objects if scheme says so', async () => {
+      user.tags = [Tag.create({ name: 'test-tag' })]
+      await user.save()
+
+      const userBody = classToPlain(user) as any
+
+      userBody.tags = []
+
+      const res = await request(app)
+        .patch(`/api/v1/users/${userBody.id}`)
+        .send(userBody)
+        .set('Accept', 'application/json')
+        .expect(200)
+
+      expect(res.body.tags.length).to.equal(0)
     })
   })
 
