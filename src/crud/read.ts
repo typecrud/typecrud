@@ -2,6 +2,7 @@ import { Route, HTTPMethod, FilterableRoute, SortableRoute, PaginatedRoute, Orde
 import { BaseEntity, FindManyOptions, IsNull, Not } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain } from 'class-transformer'
+import { TypeCrudConfig } from '..'
 
 export class ReadRoute<T extends BaseEntity> extends Route<T> implements FilterableRoute, SortableRoute, PaginatedRoute {
   isPaginated = false
@@ -9,8 +10,8 @@ export class ReadRoute<T extends BaseEntity> extends Route<T> implements Filtera
   orderBy: { key: string; order: Order } | null = null
   orderKeys: string[] = []
 
-  constructor(private model: typeof BaseEntity, path: string) {
-    super(HTTPMethod.GET, path)
+  constructor(private model: typeof BaseEntity, path: string, config: TypeCrudConfig<T>) {
+    super(HTTPMethod.GET, path, config)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {

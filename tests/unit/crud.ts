@@ -46,6 +46,28 @@ describe('CRUD', () => {
         })
     })
 
+    it('should create multiple entities', done => {
+      const events = [{ name: 'TestName', startsAt: new Date() }, { name: 'TestName2', startsAt: new Date() }]
+      request(app)
+        .post(`/api/v1/events`)
+        .send(events)
+        .set('Accept', 'application/json')
+        .expect(201)
+        .end((err, res) => {
+          if (err || res.status !== 201) {
+            console.warn(res.body)
+            return done(err)
+          }
+
+          expect(Array.isArray(res.body)).to.be.true
+
+          expect(res.body[0]).to.contain(convertDates(classToPlain(events[0])))
+          expect(res.body[1]).to.contain(convertDates(classToPlain(events[1])))
+
+          done()
+        })
+    })
+
     it('should give validation errors for incorrect fields', done => {
       const user = { firstname: '', lastname: 'Testibus', age: 50 }
       request(app)

@@ -3,6 +3,7 @@ import { asyncRequestHandler } from './middleware/async'
 import { BaseEntity, getManager, FindOperator } from 'typeorm'
 import { ValidationError, validate } from 'class-validator'
 import 'reflect-metadata'
+import { TypeCrudConfig } from '.'
 
 export enum HTTPMethod {
   GET = 'GET',
@@ -39,7 +40,7 @@ export abstract class Route<T> {
 
   queryFilter?: (request: Request) => { [x: string]: FindOperator<any> }
 
-  constructor(protected method: HTTPMethod, private path: string) {}
+  constructor(protected method: HTTPMethod, private path: string, protected config: TypeCrudConfig<T>) {}
 
   getRouter(): Router {
     return (Router() as any)[this.method.toLowerCase()](this.path, asyncRequestHandler(this.requestHandler.bind(this)))

@@ -1,10 +1,11 @@
 import { Route, HTTPMethod } from '../route'
 import { BaseEntity, FindOneOptions } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
+import { TypeCrudConfig } from '..'
 
 export class DeleteRoute<T extends BaseEntity> extends Route<T> {
-  constructor(private model: typeof BaseEntity, path: string) {
-    super(HTTPMethod.DELETE, path)
+  constructor(private model: typeof BaseEntity, path: string, config: TypeCrudConfig<T>) {
+    super(HTTPMethod.DELETE, path, config)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {

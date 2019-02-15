@@ -2,31 +2,56 @@ import { Route, HTTPMethod } from '../route'
 import { BaseEntity } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain, plainToClass } from 'class-transformer'
+import { TypeCrudConfig } from '..'
 
 export class CreateRoute<T extends BaseEntity> extends Route<T> {
-  constructor(private model: typeof BaseEntity, path: string) {
-    super(HTTPMethod.POST, path)
+  constructor(private model: typeof BaseEntity, path: string, config: TypeCrudConfig<T>) {
+    super(HTTPMethod.POST, path, config)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
-    // copy over all supplied params to entity
-    const newClass = plainToClass<BaseEntity, Object>(this.model, request.body)
+    if (Array.isArray(request.body) && !this.config.multiCreation) {
+      return response.status(400).send()
+    }
 
-    // validate object
-    const errors = await this.validateEntity(newClass)
-    if (errors && errors.length > 0) {
+    // copy over all supplied params to entity
+    const newEntities = plainToClass<BaseEntity, Array<Object>>(this.model, Array.isArray(request.body) ? request.body : [request.body])
+
+    const savedEntities: BaseEntity[] = []
+
+    // validate all entities
+    const errors: any[] = []
+    await Promise.all(
+      newEntities.map(async newClass => {
+        const err = await this.validateEntity(newClass)
+        if (err && err.length > 0) {
+          errors.push(err)
+        }
+      })
+    )
+
+    if (errors.length > 0) {
       return response.status(400).json(errors)
     }
 
-    // execute pre-operation hook
-    await this.preEntityHook(request, newClass as T)
+    await Promise.all(
+      newEntities.map(async newClass => {
+        // execute pre-operation hook
+        await this.preEntityHook(request, newClass as T)
 
-    // save object if valid
-    const savedEntity = await newClass.save()
+        // save object if valid
+        const savedEntity = await newClass.save()
+        savedEntities.push(savedEntity)
 
-    // execute post-operation hook
-    await this.postEntityHook(request, savedEntity as T)
+        // execute post-operation hook
+        await this.postEntityHook(request, savedEntity as T)
+      })
+    )
 
-    return response.status(201).json(classToPlain(savedEntity))
+    if (savedEntities.length === 1) {
+      return response.status(201).json(classToPlain(savedEntities[0]))
+    }
+
+    return response.status(201).json(classToPlain(savedEntities))
   }
 }

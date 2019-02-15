@@ -47,6 +47,7 @@ export interface TypeCrudConfig<T> {
   softDeleteBy?: string
   isPaginatable?: boolean
   includeRelations?: string[]
+  multiCreation?: boolean
   hooks?: {
     pre?: { [x: string]: (request: Request, entity: T) => void | Promise<void> }
     post?: { [x: string]: (request: Request, entity: T) => void | Promise<void> }
@@ -63,7 +64,7 @@ export class TypeCrud<T extends BaseEntity> {
   private paginatableRoutes: PaginatedRoute[] = []
   private routes: Route<T>[] = []
 
-  constructor(model: typeof BaseEntity, config: TypeCrudConfig<T> = {} as TypeCrudConfig<T>) {
+  constructor(model: typeof BaseEntity, protected config: TypeCrudConfig<T> = {} as TypeCrudConfig<T>) {
     const crud = config.crudTypes || defaultCrudTypes
     const uniqueCrud = crud.filter((x, i) => crud.indexOf(x) === i)
     this.router = Router()
@@ -71,7 +72,7 @@ export class TypeCrud<T extends BaseEntity> {
     uniqueCrud.forEach(crud => {
       const crudConstructor = crudConstructors[crud]
 
-      const route = this.routeFactory(crudConstructor.route, model, crudConstructor.defaultSuffix)
+      const route = this.routeFactory(crudConstructor.route, model, crudConstructor.defaultSuffix, config)
       const crudRouter = route.getRouter()
 
       // check if we support filterKeys
@@ -104,11 +105,12 @@ export class TypeCrud<T extends BaseEntity> {
   }
 
   private routeFactory(
-    type: new (model: typeof BaseEntity, path: string) => Route<T>,
+    type: new (model: typeof BaseEntity, path: string, config: TypeCrudConfig<T>) => Route<T>,
     model: typeof BaseEntity,
-    defaultSuffix: string
+    defaultSuffix: string,
+    config: TypeCrudConfig<T>
   ): Route<T> {
-    return new type(model, defaultSuffix)
+    return new type(model, defaultSuffix, config)
   }
 
   private hooks(hooks: {

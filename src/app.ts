@@ -24,6 +24,6 @@ app.use(
   }).router
 )
 
-app.use('/api/v1/events', new TypeCrud<Event>(Event).router)
+app.use('/api/v1/events', new TypeCrud<Event>(Event, { multiCreation: true }).router)
 
 export { app }
