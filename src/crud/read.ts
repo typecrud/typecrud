@@ -88,6 +88,12 @@ export class ReadRoute<T extends BaseEntity> extends Route<T> implements Filtera
     // execute post-operation hook
     await this.postEntityHook(request, entities as T[])
 
-    return response.status(200).json(classToPlain(entities))
+    // serialize
+    const serializedEntities = classToPlain(entities)
+
+    // execute post-serialization hook
+    await this.postSerializationHook(request, serializedEntities)
+
+    return response.status(200).json(serializedEntities)
   }
 }

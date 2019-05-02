@@ -52,9 +52,21 @@ export class CreateRoute<T extends BaseEntity> extends Route<T> {
     )
 
     if (savedEntities.length === 1) {
-      return response.status(201).json(classToPlain(savedEntities[0]))
+      // serialize
+      const serializedEntity = classToPlain(savedEntities[0])
+
+      // execute post-serialization hook
+      await this.postSerializationHook(request, serializedEntity)
+
+      return response.status(201).json(serializedEntity)
     }
 
-    return response.status(201).json(classToPlain(savedEntities))
+    // serialize
+    const serializedEntities = classToPlain(savedEntities)
+
+    // execute post-serialization hook
+    await this.postSerializationHook(request, serializedEntities)
+
+    return response.status(201).json(serializedEntities)
   }
 }

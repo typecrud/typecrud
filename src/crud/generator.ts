@@ -31,6 +31,12 @@ const crudConstructors = {
   }
 }
 
+export interface Hooks<T> {
+  pre?: { [x in CRUDType]?: (request: Request, entity: T | T[]) => void | Promise<void> }
+  post?: { [x in CRUDType]?: (request: Request, entity: T | T[]) => void | Promise<void> }
+  postSerialization?: { [x in CRUDType]?: (request: Request, object: Object | Object[]) => void | Promise<void> }
+}
+
 export interface TypeCrudConfig<T> {
   crudTypes?: CRUDType[]
   queryFilter?: (request: Request) => { [x: string]: FindOperator<any> }
@@ -41,10 +47,7 @@ export interface TypeCrudConfig<T> {
   isPaginatable?: boolean
   includeRelations?: string[]
   multiCreation?: boolean
-  hooks?: {
-    pre?: { [x: string]: (request: Request, entity: T | T[]) => void | Promise<void> }
-    post?: { [x: string]: (request: Request, entity: T | T[]) => void | Promise<void> }
-  }
+  hooks?: Hooks<T>
 }
 
 const defaultCrudTypes = [CRUDType.Create, CRUDType.ReadOne, CRUDType.Read, CRUDType.Update, CRUDType.Delete]
@@ -106,13 +109,9 @@ export class TypeCrud<T extends BaseEntity> {
     return new type(model, defaultSuffix, config)
   }
 
-  private hooks(hooks: {
-    pre?: { [x: string]: (request: Request, entity: T | T[]) => void | Promise<void> }
-    post?: { [x: string]: (request: Request, entity: T | T[]) => void | Promise<void> }
-  }) {
+  private hooks(hooks: Hooks<T>) {
     this.routes.forEach(route => {
-      if (hooks.pre) route.preEntityHooks = hooks.pre
-      if (hooks.post) route.postEntityHooks = hooks.post
+      route.hooks = hooks
     })
 
     return this

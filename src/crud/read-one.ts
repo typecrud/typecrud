@@ -33,6 +33,12 @@ export class ReadOneRoute<T extends BaseEntity> extends Route<T> {
     // execute post-operation hook
     await this.postEntityHook(request, entity as T)
 
-    return response.status(200).json(classToPlain(entity))
+    // serialize
+    const serializedEntity = classToPlain(entity)
+
+    // execute post-serialization hook
+    await this.postSerializationHook(request, serializedEntity)
+
+    return response.status(200).json(serializedEntity)
   }
 }

@@ -5,6 +5,7 @@ import { ValidationError, validate } from 'class-validator'
 import 'reflect-metadata'
 import { TypeCrudConfig } from '.'
 import { Order, CRUDType, CRUDTypeHTTPMethodMapping } from './crud/constants'
+import { Hooks } from './crud/generator'
 
 export interface FilterableRoute {
   filterKeys: string[]
@@ -24,8 +25,7 @@ export abstract class Route<T> {
   softDeletionKey?: string
   protected crudType!: CRUDType
 
-  preEntityHooks: { [x: string]: (request: Request, entity: T | T[]) => void | Promise<void> } = {}
-  postEntityHooks: { [x: string]: (request: Request, entity: T | T[]) => void | Promise<void> } = {}
+  hooks?: Hooks<T>
 
   queryFilter?: (request: Request) => { [x: string]: FindOperator<any> }
 
@@ -54,14 +54,20 @@ export abstract class Route<T> {
   }
 
   protected async preEntityHook(request: Request, entity: T | T[]) {
-    if (this.preEntityHooks[this.crudType]) {
-      this.preEntityHooks[this.crudType](request, entity)
+    if (this.hooks && this.hooks.pre && this.hooks.pre[this.crudType]) {
+      this.hooks.pre[this.crudType]!(request, entity)
     }
   }
 
   protected async postEntityHook(request: Request, entity: T | T[]) {
-    if (this.postEntityHooks[this.crudType]) {
-      this.postEntityHooks[this.crudType](request, entity)
+    if (this.hooks && this.hooks.post && this.hooks.post[this.crudType]) {
+      this.hooks.post[this.crudType]!(request, entity)
+    }
+  }
+
+  protected async postSerializationHook(request: Request, serializedObject: Object | Object[]) {
+    if (this.hooks && this.hooks.postSerialization && this.hooks.postSerialization[this.crudType]) {
+      this.hooks.postSerialization[this.crudType]!(request, serializedObject)
     }
   }
 

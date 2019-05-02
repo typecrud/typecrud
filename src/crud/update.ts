@@ -57,11 +57,17 @@ export class UpdateRoute<T extends BaseEntity> extends Route<T> {
     await entity.save()
 
     // load existing entity from DB
-    const savedEntitiy = await this.model.findOne(request.params.id, query)
+    const savedEntity = await this.model.findOne(request.params.id, query)
 
     // execute post-operation hook
-    await this.postEntityHook(request, savedEntitiy as T)
+    await this.postEntityHook(request, savedEntity as T)
 
-    return response.status(200).json(classToPlain(savedEntitiy))
+    // serialize
+    const serializedEntity = classToPlain(savedEntity)
+
+    // execute post-serialization hook
+    await this.postSerializationHook(request, serializedEntity)
+
+    return response.status(200).json(serializedEntity)
   }
 }
