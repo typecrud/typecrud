@@ -1,11 +1,14 @@
-import { Route, HTTPMethod } from '../route'
+import { Route } from '../route'
 import { BaseEntity, FindOneOptions } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { TypeCrudConfig } from '..'
+import { CRUDType } from './constants'
 
 export class DeleteRoute<T extends BaseEntity> extends Route<T> {
+  crudType = CRUDType.Delete
+
   constructor(private model: typeof BaseEntity, path: string, config: TypeCrudConfig<T>) {
-    super(HTTPMethod.DELETE, path, config)
+    super(path, config)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
@@ -34,7 +37,7 @@ export class DeleteRoute<T extends BaseEntity> extends Route<T> {
     }
 
     // execute pre-operation hook
-    await this.preEntityHook(request, entity as T)
+    await this.postEntityHook(request, entity as T)
 
     return response.sendStatus(204)
   }

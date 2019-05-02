@@ -2,8 +2,8 @@ import * as express from 'express'
 import { json } from 'body-parser'
 import { User } from './database/entities/user'
 import { TypeCrud } from './crud/generator'
-import { Order, HTTPMethod } from './route'
 import { Event } from './database/entities/event'
+import { Order, CRUDType } from '.'
 
 const app = express()
 
@@ -17,7 +17,7 @@ app.use(
     softDeleteBy: 'deletedAt',
     hooks: {
       pre: {
-        [HTTPMethod.POST]: (request, entity: User) => {}
+        [CRUDType.Create]: (request, entity: User | User[]) => {}
       }
     },
     includeRelations: ['events', 'tags']

@@ -1,12 +1,15 @@
-import { Route, HTTPMethod } from '../route'
+import { Route } from '../route'
 import { BaseEntity, FindOneOptions, IsNull } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain } from 'class-transformer'
 import { TypeCrudConfig } from '..'
+import { CRUDType } from './constants'
 
 export class ReadOneRoute<T extends BaseEntity> extends Route<T> {
+  crudType = CRUDType.ReadOne
+
   constructor(private model: typeof BaseEntity, path: string, config: TypeCrudConfig<T>) {
-    super(HTTPMethod.GET, path, config)
+    super(path, config)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
@@ -26,6 +29,9 @@ export class ReadOneRoute<T extends BaseEntity> extends Route<T> {
     if (!entity) {
       return response.sendStatus(404)
     }
+
+    // execute post-operation hook
+    await this.postEntityHook(request, entity as T)
 
     return response.status(200).json(classToPlain(entity))
   }

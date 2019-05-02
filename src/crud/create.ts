@@ -1,12 +1,15 @@
-import { Route, HTTPMethod } from '../route'
+import { Route } from '../route'
 import { BaseEntity } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain, plainToClass } from 'class-transformer'
 import { TypeCrudConfig } from '..'
+import { CRUDType } from './constants'
 
 export class CreateRoute<T extends BaseEntity> extends Route<T> {
+  crudType = CRUDType.Create
+
   constructor(private model: typeof BaseEntity, path: string, config: TypeCrudConfig<T>) {
-    super(HTTPMethod.POST, path, config)
+    super(path, config)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {

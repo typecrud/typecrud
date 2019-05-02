@@ -1,17 +1,19 @@
-import { Route, HTTPMethod, FilterableRoute, SortableRoute, PaginatedRoute, Order } from '../route'
+import { Route, FilterableRoute, SortableRoute, PaginatedRoute } from '../route'
 import { BaseEntity, FindManyOptions, IsNull, Not } from 'typeorm'
 import { Request, Response, NextFunction } from 'express'
 import { classToPlain } from 'class-transformer'
 import { TypeCrudConfig } from '..'
+import { CRUDType, Order } from './constants'
 
 export class ReadRoute<T extends BaseEntity> extends Route<T> implements FilterableRoute, SortableRoute, PaginatedRoute {
+  crudType = CRUDType.Read
   isPaginated = false
   filterKeys: string[] = []
   orderBy: { key: string; order: Order } | null = null
   orderKeys: string[] = []
 
   constructor(private model: typeof BaseEntity, path: string, config: TypeCrudConfig<T>) {
-    super(HTTPMethod.GET, path, config)
+    super(path, config)
   }
 
   async requestHandler(request: Request, response: Response, next: NextFunction): Promise<any> {
@@ -82,6 +84,9 @@ export class ReadRoute<T extends BaseEntity> extends Route<T> implements Filtera
     if (!entities || entities.length === 0) {
       return response.status(200).json([])
     }
+
+    // execute post-operation hook
+    await this.postEntityHook(request, entities as T[])
 
     return response.status(200).json(classToPlain(entities))
   }

@@ -5,37 +5,30 @@ import { DeleteRoute } from './delete'
 import { BaseEntity, FindOperator } from 'typeorm'
 import { Router, Request } from 'express'
 import { ReadOneRoute } from './read-one'
-import { Route, FilterableRoute, SortableRoute, PaginatedRoute, Order } from '../route'
+import { Route, FilterableRoute, SortableRoute, PaginatedRoute } from '../route'
+import { Order, CRUDType } from './constants'
 
 const crudConstructors = {
-  0: {
+  [CRUDType.Create]: {
     route: CreateRoute,
     defaultSuffix: '/'
   },
-  1: {
+  [CRUDType.Read]: {
     route: ReadRoute,
     defaultSuffix: '/'
   },
-  2: {
+  [CRUDType.ReadOne]: {
     route: ReadOneRoute,
     defaultSuffix: '/:id'
   },
-  3: {
+  [CRUDType.Update]: {
     route: UpdateRoute,
     defaultSuffix: '/:id'
   },
-  4: {
+  [CRUDType.Delete]: {
     route: DeleteRoute,
     defaultSuffix: '/:id'
   }
-}
-
-export enum CRUDType {
-  Create,
-  Read,
-  ReadOne,
-  Update,
-  Delete
 }
 
 export interface TypeCrudConfig<T> {
@@ -49,8 +42,8 @@ export interface TypeCrudConfig<T> {
   includeRelations?: string[]
   multiCreation?: boolean
   hooks?: {
-    pre?: { [x: string]: (request: Request, entity: T) => void | Promise<void> }
-    post?: { [x: string]: (request: Request, entity: T) => void | Promise<void> }
+    pre?: { [x: string]: (request: Request, entity: T | T[]) => void | Promise<void> }
+    post?: { [x: string]: (request: Request, entity: T | T[]) => void | Promise<void> }
   }
 }
 
@@ -114,8 +107,8 @@ export class TypeCrud<T extends BaseEntity> {
   }
 
   private hooks(hooks: {
-    pre?: { [x: string]: (request: Request, entity: T) => void | Promise<void> }
-    post?: { [x: string]: (request: Request, entity: T) => void | Promise<void> }
+    pre?: { [x: string]: (request: Request, entity: T | T[]) => void | Promise<void> }
+    post?: { [x: string]: (request: Request, entity: T | T[]) => void | Promise<void> }
   }) {
     this.routes.forEach(route => {
       if (hooks.pre) route.preEntityHooks = hooks.pre
