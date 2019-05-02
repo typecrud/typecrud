@@ -51,7 +51,7 @@ export class UpdateRoute<T extends BaseEntity> extends Route<T> {
     }
 
     // execute pre-operation hook
-    await this.preEntityHook(request, entity as T)
+    await this.preEntityHook(request, [entity as T])
 
     // save merged entity
     await entity.save()
@@ -60,13 +60,13 @@ export class UpdateRoute<T extends BaseEntity> extends Route<T> {
     const savedEntity = await this.model.findOne(request.params.id, query)
 
     // execute post-operation hook
-    await this.postEntityHook(request, savedEntity as T)
+    await this.postEntityHook(request, [savedEntity as T])
 
     // serialize
     const serializedEntity = classToPlain(savedEntity)
 
     // execute post-serialization hook
-    await this.postSerializationHook(request, serializedEntity)
+    await this.postSerializationHook(request, [serializedEntity])
 
     return response.status(200).json(serializedEntity)
   }

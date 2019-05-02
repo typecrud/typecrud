@@ -32,9 +32,9 @@ const crudConstructors = {
 }
 
 export interface Hooks<T> {
-  pre?: { [x in CRUDType]?: (request: Request, entity: T | T[]) => void | Promise<void> }
-  post?: { [x in CRUDType]?: (request: Request, entity: T | T[]) => void | Promise<void> }
-  postSerialization?: { [x in CRUDType]?: (request: Request, object: Object | Object[]) => void | Promise<void> }
+  pre?: { [x in CRUDType]?: (request: Request, entity: T[]) => void | Promise<void> }
+  post?: { [x in CRUDType]?: (request: Request, entity: T[]) => void | Promise<void> }
+  postSerialization?: { [x in CRUDType]?: (request: Request, object: Object[]) => void | Promise<void> }
 }
 
 export interface TypeCrudConfig<T> {

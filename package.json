@@ -1,6 +1,6 @@
 {
   "name": "typecrud",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Easily generate CRUD REST-endpoints for express.js, from your TypeORM entities.",
   "main": "lib/index.js",
   "scripts": {

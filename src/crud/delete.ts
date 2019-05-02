@@ -26,7 +26,7 @@ export class DeleteRoute<T extends BaseEntity> extends Route<T> {
     }
 
     // execute pre-operation hook
-    await this.preEntityHook(request, entity as T)
+    await this.preEntityHook(request, [entity as T])
 
     // check if entity is able to be soft-deleted
     if (this.softDeletionKey) {
@@ -37,7 +37,7 @@ export class DeleteRoute<T extends BaseEntity> extends Route<T> {
     }
 
     // execute pre-operation hook
-    await this.postEntityHook(request, entity as T)
+    await this.postEntityHook(request, [entity as T])
 
     return response.sendStatus(204)
   }

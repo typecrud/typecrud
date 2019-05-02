@@ -53,19 +53,19 @@ export abstract class Route<T> {
     return errors
   }
 
-  protected async preEntityHook(request: Request, entity: T | T[]) {
+  protected async preEntityHook(request: Request, entity: T[]) {
     if (this.hooks && this.hooks.pre && this.hooks.pre[this.crudType]) {
       this.hooks.pre[this.crudType]!(request, entity)
     }
   }
 
-  protected async postEntityHook(request: Request, entity: T | T[]) {
+  protected async postEntityHook(request: Request, entity: T[]) {
     if (this.hooks && this.hooks.post && this.hooks.post[this.crudType]) {
       this.hooks.post[this.crudType]!(request, entity)
     }
   }
 
-  protected async postSerializationHook(request: Request, serializedObject: Object | Object[]) {
+  protected async postSerializationHook(request: Request, serializedObject: Object[]) {
     if (this.hooks && this.hooks.postSerialization && this.hooks.postSerialization[this.crudType]) {
       this.hooks.postSerialization[this.crudType]!(request, serializedObject)
     }

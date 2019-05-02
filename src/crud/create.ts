@@ -40,14 +40,14 @@ export class CreateRoute<T extends BaseEntity> extends Route<T> {
     await Promise.all(
       newEntities.map(async newClass => {
         // execute pre-operation hook
-        await this.preEntityHook(request, newClass as T)
+        await this.preEntityHook(request, [newClass as T])
 
         // save object if valid
         const savedEntity = await newClass.save()
         savedEntities.push(savedEntity)
 
         // execute post-operation hook
-        await this.postEntityHook(request, savedEntity as T)
+        await this.postEntityHook(request, [savedEntity as T])
       })
     )
 
@@ -56,7 +56,7 @@ export class CreateRoute<T extends BaseEntity> extends Route<T> {
       const serializedEntity = classToPlain(savedEntities[0])
 
       // execute post-serialization hook
-      await this.postSerializationHook(request, serializedEntity)
+      await this.postSerializationHook(request, [serializedEntity])
 
       return response.status(201).json(serializedEntity)
     }
@@ -65,7 +65,7 @@ export class CreateRoute<T extends BaseEntity> extends Route<T> {
     const serializedEntities = classToPlain(savedEntities)
 
     // execute post-serialization hook
-    await this.postSerializationHook(request, serializedEntities)
+    await this.postSerializationHook(request, [serializedEntities])
 
     return response.status(201).json(serializedEntities)
   }

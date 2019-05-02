@@ -17,7 +17,7 @@ app.use(
     softDeleteBy: 'deletedAt',
     hooks: {
       pre: {
-        [CRUDType.Create]: (request, entity: User | User[]) => {}
+        [CRUDType.Create]: (request, entity: User[]) => {}
       }
     },
     includeRelations: ['events', 'tags']
